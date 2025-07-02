@@ -1,0 +1,9 @@
+.ipynb_checkpoints/
+langgraph-env/
+.langgraph_api/
+.idea/
+
+# Byte-compiled / optimized / DLL files
+**/__pycache__/**
+
+.env
