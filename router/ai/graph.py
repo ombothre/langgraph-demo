@@ -1,28 +1,42 @@
 from router.ai.llm import LLM
 from router.ai.prompts import system_prompt
-from langgraph.graph import START, END
 from langgraph.graph import StateGraph
 from router.models.state import MessageState
 from langchain_core.messages import AnyMessage
+from router.services.helpers import has_tools, run_tools, view_graph
+from router.models.node import Nodes
 
 # State
 ## MessageState
 
 # Nodes
-## state node
-def state_node(state: MessageState) -> MessageState:
-    return {
-        "messages": [system_prompt]
-    }
-
 ## llm
 llm = LLM()
 tool_llm = llm.get_tools_llm()
 
 def tool_llm_node(state: MessageState) -> MessageState:
+    result: AnyMessage = tool_llm.invoke(state["messages"])
     return {
-        "messages": [tool_llm.invoke(state["messages"])]
+        "messages": [result]
     }
+
+## tool node
+def tool_call_node(state: MessageState) -> MessageState:
+    
+    tools_list = run_tools(state["messages"][-1].tool_calls)
+
+    return {
+        "messages": tools_list
+    }
+
+# Edge
+## conditional
+def tools_condition(state: MessageState) -> Nodes:    # Replacing langgraph.prebuilt import tools_condition
+
+    if has_tools(state["messages"][-1]):
+        return Nodes.TOOL_NODE
+    
+    return Nodes.END
 
 # Graph
 class AiGraph:
@@ -34,16 +48,19 @@ class AiGraph:
 
     def _build_graph(self):
         # Nodes
-        self.builder.add_node("state_node", state_node)
-        self.builder.add_node("tool_llm_node", tool_llm_node)
+        self.builder.add_node(Nodes.LLM_NODE, tool_llm_node)
+        self.builder.add_node(Nodes.TOOL_NODE, tool_call_node)      # Replacing langgraph.prebuilt import ToolNode
 
         # Edges
-        self.builder.add_edge(START, "state_node")
-        self.builder.add_edge("state_node", "tool_llm_node")
-        self.builder.add_edge("tool_llm_node", END)
+        self.builder.add_edge(Nodes.START, Nodes.LLM_NODE)
+        self.builder.add_conditional_edges(Nodes.LLM_NODE, tools_condition)
+        self.builder.add_edge(Nodes.TOOL_NODE, Nodes.END)
 
     def run(self, messages: list[AnyMessage]):
-        return self.graph.invoke({"messages": messages})
+        return self.graph.invoke({"messages": [system_prompt] + messages})
     
     def get(self):
         return self.graph
+    
+    def view(self):
+        view_graph(self.graph)
