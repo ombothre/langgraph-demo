@@ -1,7 +1,8 @@
 {
   "dockerfile_lines": [],
   "graphs": {
-    "basic_tools": "./simple/studio.py:graph"
+    "basic": "./simple/studio.py:graph",
+    "router": "./router/studio.py:graph"
   },
   "env": "./.env",
   "python_version": "3.11",      

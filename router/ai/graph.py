@@ -1,8 +1,8 @@
-from simple.ai.llm import LLM
-from simple.ai.prompts import system_prompt
+from router.ai.llm import LLM
+from router.ai.prompts import system_prompt
 from langgraph.graph import START, END
 from langgraph.graph import StateGraph
-from simple.models.state import MessageState
+from router.models.state import MessageState
 from langchain_core.messages import AnyMessage
 
 # State
@@ -17,11 +17,11 @@ def state_node(state: MessageState) -> MessageState:
 
 ## llm
 llm = LLM()
-llm = llm.get_llm()
+tool_llm = llm.get_tools_llm()
 
-def llm_node(state: MessageState) -> MessageState:
+def tool_llm_node(state: MessageState) -> MessageState:
     return {
-        "messages": [llm.invoke(state["messages"])]
+        "messages": [tool_llm.invoke(state["messages"])]
     }
 
 # Graph
@@ -35,12 +35,12 @@ class AiGraph:
     def _build_graph(self):
         # Nodes
         self.builder.add_node("state_node", state_node)
-        self.builder.add_node("llm_node", llm_node)
+        self.builder.add_node("tool_llm_node", tool_llm_node)
 
         # Edges
         self.builder.add_edge(START, "state_node")
-        self.builder.add_edge("state_node", "llm_node")
-        self.builder.add_edge("llm_node", END)
+        self.builder.add_edge("state_node", "tool_llm_node")
+        self.builder.add_edge("tool_llm_node", END)
 
     def run(self, messages: list[AnyMessage]):
         return self.graph.invoke({"messages": messages})
