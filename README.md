@@ -23,10 +23,10 @@ pip install -r requirements.txt
 
 ### 3. Run Locally
 
-To run the agent locally from the terminal:
+To run any project locally from the terminal:
 
 ```sh
-python main.py
+python <project>_run.py
 ```
 
 - This will prompt for a user message and print the agent's response.
@@ -34,7 +34,7 @@ python main.py
 ### 4. Run in LangGraph Studio
 
 - The project is configured for Studio via [`langgraph.json`](langgraph.json).
-- The entrypoint for Studio is [`studio.py`](simple/studio.py), which exposes the graph as `graph`.
+- The entrypoint for Studio is [`studio.py`] , which exposes the graph as `graph`.
 - Launch Studio with:
 
 ```sh
@@ -47,7 +47,7 @@ langgraph dev
 
 ## Folder Structure
 
-- **simple/**
+- **<project>/**
   - `main.py` — CLI entrypoint for local runs.
   - `studio.py` — Entrypoint for LangGraph Studio (exports the graph).
   - **ai/**
@@ -61,17 +61,7 @@ langgraph dev
   - **services/**
     - `helpers.py` — Utility functions for message handling.
     - `tools.py` — Example tool functions (add, product).
-
----
-
-## How it Works
-
-- The agent is a simple tool-using assistant.
-- The graph is defined in [`simple/ai/graph.py`](simple/ai/graph.py).
-- Tools are defined in [`simple/services/tools.py`](simple/services/tools.py) and bound to the LLM in [`simple/ai/llm.py`](simple/ai/llm.py).
-- The state is managed as a list of messages ([`simple/models/state.py`](simple/models/state.py)).
-- For local runs, [`simple/main.py`](simple/main.py) takes user input and prints the response.
-- For Studio, [`simple/studio.py`](simple/studio.py) exposes the graph for the UI.
+- **<project>_run.py** - To run that project locally
 
 ---
 
@@ -85,4 +75,3 @@ langgraph dev
 ## References
 
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
--

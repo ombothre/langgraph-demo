@@ -1,9 +1,9 @@
-from services.helpers import ai_input
-from ai.graph import AiGraph
+from router.services.helpers import ai_input
+from router.ai.graph import AiGraph
 
-user_query = input("Enter message: ")
-ai = AiGraph()
-result = ai.run(ai_input(user_query))
+def chat(message: str):
+    ai = AiGraph()
+    result = ai.run(ai_input(message))
 
-for i in result["messages"]:
-    i.pretty_print()
+    for i in result["messages"]:
+        i.pretty_print()
