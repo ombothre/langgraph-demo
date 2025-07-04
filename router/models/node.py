@@ -6,3 +6,6 @@ class Nodes(str, Enum):
     
     LLM_NODE = "tool_llm_node"
     TOOL_NODE = "tool_call_node"
+
+    def __str__(self):
+        return self.value

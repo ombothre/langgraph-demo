@@ -1,3 +1,4 @@
+from typing import Literal
 from router.ai.llm import LLM
 from router.ai.prompts import system_prompt
 from langgraph.graph import StateGraph
@@ -31,7 +32,7 @@ def tool_call_node(state: MessageState) -> MessageState:
 
 # Edge
 ## conditional
-def tools_condition(state: MessageState) -> Nodes:    # Replacing langgraph.prebuilt import tools_condition
+def tools_condition(state: MessageState) -> Literal[Nodes.TOOL_NODE, Nodes.END]:    # type: ignore # Replacing langgraph.prebuilt import tools_condition
 
     if has_tools(state["messages"][-1]):
         return Nodes.TOOL_NODE
@@ -48,13 +49,13 @@ class AiGraph:
 
     def _build_graph(self):
         # Nodes
-        self.builder.add_node(Nodes.LLM_NODE, tool_llm_node)
-        self.builder.add_node(Nodes.TOOL_NODE, tool_call_node)      # Replacing langgraph.prebuilt import ToolNode
+        self.builder.add_node(Nodes.LLM_NODE.value, tool_llm_node)
+        self.builder.add_node(Nodes.TOOL_NODE.value, tool_call_node)      # Replacing langgraph.prebuilt import ToolNode
 
         # Edges
-        self.builder.add_edge(Nodes.START, Nodes.LLM_NODE)
-        self.builder.add_conditional_edges(Nodes.LLM_NODE, tools_condition)
-        self.builder.add_edge(Nodes.TOOL_NODE, Nodes.END)
+        self.builder.add_edge(Nodes.START.value, Nodes.LLM_NODE.value)
+        self.builder.add_conditional_edges(Nodes.LLM_NODE.value, tools_condition)
+        self.builder.add_edge(Nodes.TOOL_NODE.value, Nodes.END.value)
 
     def run(self, messages: list[AnyMessage]):
         return self.graph.invoke({"messages": [system_prompt] + messages})
